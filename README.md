@@ -1,0 +1,2 @@
+# GraphPlan
+Relaxed Graphplan algorithm
