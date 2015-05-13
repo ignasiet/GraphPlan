@@ -15,7 +15,7 @@ public class graphplanner {
 	private Hashtable<String, AbstractAction> _Actions = new Hashtable<String, AbstractAction>();
 	private Hashtable<String, Integer> _State = new Hashtable<String, Integer>();
 	private ArrayList<String> _Goal = new ArrayList<String>();
-	private ArrayList<String> _Plan = new ArrayList<String>();
+	protected ArrayList<String> _Plan = new ArrayList<String>();
 
 	public graphplanner(Hashtable<String, Integer> state, Hashtable<String, AbstractAction> Actions, ArrayList<String> goal) {
 		_State = state;
@@ -42,6 +42,7 @@ public class graphplanner {
 	}
 	
 	private void backtrackPlan() {
+		Hashtable<String, Integer> achieved_preconds = new Hashtable<String, Integer>();
 		Step currentStep = _Steps.get(_Steps.size()-1);
 		ArrayList<String> _subgoal = new ArrayList<String>(_Goal);
 		while(currentStep.father != null){
@@ -49,10 +50,13 @@ public class graphplanner {
 			for(String p : _subgoal){
 				Node n = currentStep.getNode(p);
 				if(n.hasParent()){
-					String new_Param = n.getParent().get(0).predicate;
-					if(!_actualList.contains(new_Param)){
-						_actualList.add(new_Param);
-					}
+					for(Node parent_node : n.getParent()){
+						String new_Param = parent_node.predicate;
+						if(!achieved_preconds.containsKey(new_Param)){
+							_actualList.add(new_Param);
+							achieved_preconds.put(new_Param, 1);
+						}
+					}					
 				}
 			}
 			_subgoal.clear();
@@ -103,11 +107,15 @@ public class graphplanner {
 				}
 			}
 		}
-		//2 Add no-ops
+		//2 Add no-ops actions and effects
 		for(Node predicate : predicates_list.getIterator()){
 			Node no = new Node("No-op-" + predicate.toString());
+			Node node_effect_no = new Node(predicate.toString());
 			ActionStep.addNode(no);
 			ActionStep.updateParentNode(no.toString(), predicate);
+			PredicateStep.addNode(node_effect_no);
+			ActionStep.updateSuccessorNode(no.predicate, node_effect_no);
+			PredicateStep.updateParentNode(node_effect_no.predicate, no);
 		}
 		ActionStep.father = predicates_list;
 		PredicateStep.father = ActionStep;

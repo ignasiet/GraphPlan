@@ -11,8 +11,10 @@ public abstract class AbstractAction {
 	 */
 	public ArrayList<String> _precond;
 	public ArrayList<String> _Positive_effects;
-	public String Name = "";
+	public ArrayList<String> _Negative_effects;
+	public String Name;
 	//public abstract void expand();
+	public boolean IsObservation;
 	
 
 }
