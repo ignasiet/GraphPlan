@@ -45,9 +45,9 @@ public class graphplanner {
 			fail = true;
 		}else{
 			backtrackPlan();
-			System.out.println("=========================================");
+			/*System.out.println("=========================================");
 			System.out.println("Plano parcialmente ordenado (incluindo no-ops): ");
-			System.out.println(_Plan.toString());
+			System.out.println(_Plan.toString());*/
 		}
 	}
 	
