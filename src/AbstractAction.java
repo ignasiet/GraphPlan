@@ -15,6 +15,7 @@ public abstract class AbstractAction {
 	public String Name;
 	//public abstract void expand();
 	public boolean IsObservation;
+	public boolean deductive_action = false;
 	
 
 }
