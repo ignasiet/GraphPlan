@@ -60,18 +60,25 @@ public class graphplanner {
 			ArrayList<String> _actions_Partial_ordered = new ArrayList<String>();
 			for(String p : _subgoal){
 				Node n = currentStep.getNode(p);
-				if(n.hasParent()){
-					for(Node parent_node : n.getParent()){
-						String new_Param = parent_node.predicate;
-						if(!achieved_preconds.containsKey(new_Param)){
+				if(!achieved_preconds.containsKey(n.predicate)){
+					if(n.hasParent()){
+						for(Node parent_node : n.getParent()){
+							String new_Param = parent_node.predicate;
 							_actualList.add(new_Param);
 							if(!new_Param.startsWith("No-op")){
 								_actions_Partial_ordered.add(new_Param);
+								achieved_preconds.put(n.predicate, 1);
 							}
-							achieved_preconds.put(new_Param, 1);
+							/*if(!achieved_preconds.containsKey(new_Param)){
+								_actualList.add(new_Param);
+								achieved_preconds.put(new_Param, 1);
+							}
+							if(!new_Param.startsWith("No-op")){
+								_actions_Partial_ordered.add(new_Param);
+							}*/
 						}
-					}					
-				}
+					}
+				}				
 			}
 			_subgoal.clear();
 			_subgoal.addAll(_actualList);
