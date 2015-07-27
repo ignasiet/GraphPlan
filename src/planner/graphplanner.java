@@ -1,6 +1,9 @@
+package planner;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Hashtable;
+
+import pddlElements.Action;
 
 /**
  * 
@@ -12,15 +15,15 @@ public class graphplanner {
 	
 	private ArrayList<Step> _Steps = new ArrayList<Step>();
 	private ArrayList<String> _Actions_list = new ArrayList<String>();
-	private Hashtable<String, AbstractAction> _Actions = new Hashtable<String, AbstractAction>();
+	private Hashtable<String, Action> _Actions = new Hashtable<String, Action>();
 	private Hashtable<String, Integer> _State = new Hashtable<String, Integer>();
 	private ArrayList<String> _Goal = new ArrayList<String>();
 	protected ArrayList<String> _Plan = new ArrayList<String>();
 	protected Hashtable<Integer, ArrayList<String>> _ActionPlan = new Hashtable<Integer, ArrayList<String>>();
 	protected Integer last_layer = 0;
-	protected boolean fail = false;
+	public boolean fail = false;
 
-	public graphplanner(Hashtable<String, Integer> state, Hashtable<String, AbstractAction> Actions, ArrayList<String> goal) {
+	public graphplanner(Hashtable<String, Integer> state, Hashtable<String, Action> Actions, ArrayList<String> goal) {
 		_State = state;
 		_Actions = Actions;
 		_Goal = goal;
@@ -124,7 +127,7 @@ public class graphplanner {
 		Step ActionStep = new Step();
 		Step PredicateStep = new Step();
 		for(String action_name : _Actions_list){
-			AbstractAction a = _Actions.get(action_name);
+			Action a = _Actions.get(action_name);
 			if(isActionApplicable(a, predicates_list)){
 				Node no = new Node(action_name);
 				ActionStep.addNode(no);
@@ -172,7 +175,7 @@ public class graphplanner {
 	}
 	
 	/**Verify if the action is applicable*/
-	private boolean isActionApplicable(AbstractAction a, Step s){
+	private boolean isActionApplicable(Action a, Step s){
 		for(String precondition : a._precond){
 			if(!precondition.contains("^")){
 				if(!s.Contains(precondition)){
