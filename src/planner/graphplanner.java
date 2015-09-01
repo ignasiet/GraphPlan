@@ -178,9 +178,15 @@ public class graphplanner {
 	private boolean isActionApplicable(Action a, Step s){
 		for(String precondition : a._precond){
 			if(!precondition.contains("^")){
-				if(!s.Contains(precondition)){
-					return false;
-				}
+				if(!precondition.startsWith("~")){
+					if(!s.Contains(precondition)){
+						return false;
+					}
+				}else {
+					if(s.Contains(precondition.substring(1))){
+						return false;
+					}
+				}				
 			}else{
 				boolean flag = false;
 				String[] orPrecond = precondition.split("\\^");
