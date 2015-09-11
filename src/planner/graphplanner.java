@@ -16,6 +16,7 @@ public class graphplanner {
 	private ArrayList<Step> _Steps = new ArrayList<Step>();
 	private ArrayList<String> _Actions_list = new ArrayList<String>();
 	private Hashtable<String, Action> _Actions = new Hashtable<String, Action>();
+	private Hashtable<String, Integer> _Invariants = new Hashtable<String, Integer>();
 	private Hashtable<String, Integer> _State = new Hashtable<String, Integer>();
 	private ArrayList<String> _Goal = new ArrayList<String>();
 	protected ArrayList<String> _Plan = new ArrayList<String>();
@@ -23,12 +24,14 @@ public class graphplanner {
 	protected Integer last_layer = 0;
 	public boolean fail = false;
 
-	public graphplanner(Hashtable<String, Integer> state, Hashtable<String, Action> Actions, ArrayList<String> goal) {
+	public graphplanner(Hashtable<String, Integer> state, Hashtable<String, Action> Actions, ArrayList<String> goal, Hashtable<String, Integer> invariants) {
 		_State = state;
 		_Actions = Actions;
 		_Goal = goal;
+		_Invariants = invariants;
 		Integer num_MAX_iter = 0;
 		initActionList();
+		cleanProblem();
 		Enumeration enumerator_states = state.keys();
 		Step stepInit = new Step();
 		stepInit.father = null;
@@ -51,6 +54,47 @@ public class graphplanner {
 			/*System.out.println("=========================================");
 			System.out.println("Plano parcialmente ordenado (incluindo no-ops): ");
 			System.out.println(_Plan.toString());*/
+		}
+	}
+	
+	private boolean isInvariant(String p) {
+		String[] pSplitted = p.split("_");
+		if(_Invariants.containsKey(pSplitted[0])){
+			return true;
+		}else{
+			return false;
+		}		
+	}
+	
+	private void cleanProblem(){
+		//1 - clean goal
+		ArrayList<String> newGoal = new ArrayList<String>();
+		Hashtable<String, Integer> newState = new Hashtable<String, Integer>();
+		for(String predicate : _Goal){
+			if(!isInvariant(predicate)){
+				newGoal.add(predicate);
+			}
+		}
+		_Goal = newGoal;
+		//2 - clean state
+		Enumeration e = _State.keys();
+		while(e.hasMoreElements()){
+			String predicate = e.nextElement().toString();
+			if(!isInvariant(predicate)){
+				newState.put(predicate, 1);
+			}
+		}
+		_State = newState;
+		//3 - clean actions
+		for(String action_name : _Actions_list){
+			ArrayList<String> newPrecond = new ArrayList<String>();
+			Action action = _Actions.get(action_name);
+			for(String precond : action._precond){
+				if(!isInvariant(precond)){
+					newPrecond.add(precond);
+				}
+			}
+			action._precond = newPrecond;
 		}
 	}
 	

@@ -47,7 +47,9 @@ public class Step {
 	}
 	
 	public void updateSuccessorNode(String node, Node successor){
-		Node n = nodesHash.get(node);
-		n.addSuccessor(successor);
+		if(!node.startsWith("~")){
+			Node n = nodesHash.get(node);
+			n.addSuccessor(successor);
+		}
 	}
 }

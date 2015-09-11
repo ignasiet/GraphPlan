@@ -17,6 +17,7 @@ public class Node {
 	private ArrayList<Node> predecessors = new ArrayList<Node>();
 	private ArrayList<Node> successors = new ArrayList<Node>();
 	public String predicate;
+	public int level;
 	
 	public Node(String pred) {
 		//Constructor
