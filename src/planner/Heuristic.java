@@ -8,6 +8,7 @@ import java.util.Enumeration;
 import java.util.Hashtable;
 
 import pddlElements.Action;
+import pddlElements.Effect;
 
 /**
  * @author ignasi
@@ -132,6 +133,19 @@ public class Heuristic {
 		            	layerMembershipFacts.addNode(effNode);
 		            }
 	    		}
+	    		//Updating LayerMembership for conditional effect-facts
+	    		for(Effect effect : a._Effects){
+	    			if(isEffectApplicable(effect, layerMembershipFacts)){
+	    				for(String eff : effect._Effects){
+		    				if(!layerMembershipFacts.Contains(eff)){
+		    					Node effNode = new Node(eff);
+				            	effNode.level = i;
+				            	//System.out.println(effNode);
+				            	layerMembershipFacts.addNode(effNode);
+				            }
+	    				}
+	    			}	    			
+	    		}
 	    	}
 	    	scheduledActions.addAll(scheduledNextActions);
 	    }
@@ -152,18 +166,20 @@ public class Heuristic {
 	    	Enumeration en = gIter.keys();
 	    	while(en.hasMoreElements()){
 	    		String kGoal = en.nextElement().toString();
-	    		if(!(markedTrue.containsKey(kGoal)) && (markedTrue.get(kGoal) > iter)){
+	    		if((!markedTrue.containsKey(kGoal)) || (markedTrue.get(kGoal) > iter)){
 	    			Action a = _Actions.get(chooseActionFF(kGoal, iter, layerMembershipActions, layerMembershipFacts));
-	    			num_selected_actions++;
-	    			for(String pr : a._precond){
-	    				if(layerMembershipFacts.getNode(pr).level!=0){
-	    					layer = layerMembershipFacts.getNode(pr).level;
-	    					goalLayer.get(layer).put(pr, 1);
-	    				}
-	    			}
-	    			for(String eff : a._Positive_effects){
-	    				markedTrue.put(eff, iter);
-	    				markedTrue.put(eff, iter-1);
+	    			if(a != null){
+		    			num_selected_actions++;
+		    			for(String pr : a._precond){
+		    				if(layerMembershipFacts.getNode(pr).level!=0){
+		    					layer = layerMembershipFacts.getNode(pr).level;
+		    					goalLayer.get(layer).put(pr, 1);
+		    				}
+		    			}
+		    			for(String eff : a._Positive_effects){
+		    				markedTrue.put(eff, iter);
+		    				markedTrue.put(eff, iter-1);
+		    			}
 	    			}
 		    	}
 	    	}	    	
@@ -207,21 +223,46 @@ public class Heuristic {
 			if((n.level == iter-1) && (a._Positive_effects.contains(kGoal))){
 				candidates.add(n.predicate);
 			}
+			for(Effect eff : a._Effects){
+				if(eff._Effects.contains(kGoal)){
+					candidates.add(n.predicate);
+				}
+			}
 		}
 		int difficulty = Integer.MAX_VALUE;
-		String best = candidates.get(0);
-		for(String act : candidates){
-			Action a = _Actions.get(act);
-			int new_difficulty = 0;
-			for(String pre : a._precond){
-				new_difficulty += layerMembershipFacts.getNode(pre).level;
+		String best = "";
+		if(!candidates.isEmpty()){
+			best = candidates.get(0);
+			for(String act : candidates){
+				Action a = _Actions.get(act);
+				int new_difficulty = 0;
+				for(String pre : a._precond){
+					new_difficulty += layerMembershipFacts.getNode(pre).level;
+				}
+				if(new_difficulty < difficulty){
+					best = act;
+					difficulty = new_difficulty;
+				}
 			}
-			if(new_difficulty < difficulty){
-				best = act;
-				difficulty = new_difficulty;
+		}		
+		return best;
+	}
+	
+	/**Verify if the conditional effect is applied*/
+	private boolean isEffectApplicable(Effect e, Step s){
+		for(String precondition : e._Condition){
+			if(!precondition.startsWith("~")){
+				if(!s.Contains(precondition)){
+					//System.out.println(a.Name);
+					return false;
+				}
+			}else {
+				if(s.Contains(precondition.substring(1))){
+					return false;
+				}
 			}
 		}
-		return best;
+		return true;
 	}
 	
 	/**Verify if the action is applicable*/
